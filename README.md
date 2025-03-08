@@ -1,2 +1,2 @@
-# sentinelsync
+# SentinelSync
 SentinelSync Bot
