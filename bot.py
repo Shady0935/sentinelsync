@@ -5,15 +5,15 @@ import logging
 import json
 from dotenv import load_dotenv
 
-# Cargar variables de entorno
+
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
-PRINCIPAL_SERVER_ID = 607066249381543946  # ID del servidor principal
-SECUNDARIO_SERVER_ID = 1346226782306832465  # ID del servidor secundario para roles
-COMANDOS_SERVER_ID = 1298147393191284736  # ID del servidor donde estarán los comandos
-ROLES_FILE = "roles_sincronizados.json"  # Archivo de roles sincronizados
+PRINCIPAL_SERVER_ID = 607066249381543946
+SECUNDARIO_SERVER_ID = 1346226782306832465 
+COMANDOS_SERVER_ID = 1298147393191284736  
+ROLES_FILE = "roles_sincronizados.json" 
 
-# Funciones para cargar/guardar roles sincronizados
+
 def load_sync_roles():
     try:
         with open(ROLES_FILE, "r") as f:
@@ -25,9 +25,9 @@ def save_sync_roles():
     with open(ROLES_FILE, "w") as f:
         json.dump(list(ROLES_SINCRONIZADOS), f)
 
-ROLES_SINCRONIZADOS = load_sync_roles()  # Cargar roles al inicio
+ROLES_SINCRONIZADOS = load_sync_roles()  
 
-# Configuración de logging
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', 
                     filename='sentinelsync.log', filemode='a')
 logger = logging.getLogger()
@@ -42,8 +42,7 @@ bot = commands.Bot(command_prefix='!!!!sentinelsync!!!!', intents=intents)
 
 @bot.event
 async def on_ready():
-    """Registra los comandos de barra en el servidor exclusivo de comandos al iniciar el bot."""
-    bot.sync_enabled = True  # Inicializar variable de sincronización
+    bot.sync_enabled = True 
     guild = bot.get_guild(COMANDOS_SERVER_ID)
     if guild:
         bot.tree.copy_global_to(guild=guild)
@@ -103,22 +102,18 @@ async def sync_roles():
         if not sec_member:
             continue
 
-        # Verificar todos los roles sincronizados
         for role_id in ROLES_SINCRONIZADOS:
             primary_role = principal_guild.get_role(role_id)
             if not primary_role:
                 continue
 
-            # Buscar rol equivalente en servidor secundario
             sec_role = get_role_by_name_fuzzy(secundario_guild, primary_role.name)
             if not sec_role:
                 continue
 
-            # Verificar estado en ambos servidores
             has_primary = primary_role in member.roles
             has_secondary = sec_role in sec_member.roles
 
-            # Sincronizar en ambas direcciones
             if has_primary and not has_secondary:
                 await sec_member.add_roles(sec_role)
                 logger.info(f"ROL AÑADIDO: {primary_role.name} a {member.name} en {secundario_guild.name}")
@@ -148,11 +143,9 @@ async def sync(interaction: discord.Interaction, option: discord.app_commands.Ch
             )
 
     if option.value == 'now':
-        # Diferir la respuesta inmediatamente
         await interaction.response.defer(ephemeral=True)
         try:
-            await sync_roles()  # Ejecutar sincronización
-            # Enviar mensaje de confirmación
+            await sync_roles() 
             await interaction.followup.send("✅ Sincronización de roles completada.", ephemeral=True)
         except Exception as e:
             logger.error(f"Error en sincronización manual: {e}")
